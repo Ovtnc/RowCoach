@@ -2,6 +2,7 @@
 
 # Backend Deployment Script from Git
 # Usage: ./deploy-from-git.sh [GIT_REPO_URL] [SSH_USER] [SSH_KEY_PATH]
+# Example: ./deploy-from-git.sh https://github.com/Ovtnc/RowCoach.git root
 
 GIT_REPO="${1:-}"
 SERVER_IP="161.97.132.240"
@@ -135,15 +136,23 @@ $SSH_CMD << 'ENDSSH'
         cd backend
     fi
     
-    # Install dependencies
-    echo "📦 Installing npm dependencies..."
-    npm install --production
+    # Install ALL dependencies (including devDependencies for build)
+    echo "📦 Installing npm dependencies (including dev dependencies for build)..."
+    npm install
     
     # Build TypeScript
     echo "🔨 Building TypeScript..."
     npm run build || {
-        echo "⚠️  Build failed, trying to continue..."
+        echo "⚠️  Build failed, checking TypeScript installation..."
+        # Try installing TypeScript globally if build fails
+        npm install -g typescript ts-node || echo "Could not install TypeScript globally"
+        npm run build || {
+            echo "❌ Build failed. Please check manually."
+            exit 1
+        }
     }
+    
+    echo "✅ Build completed successfully"
 ENDSSH
 
 echo "📦 Step 6: Creating PM2 ecosystem file..."
