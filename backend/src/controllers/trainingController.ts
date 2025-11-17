@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import Training, { ITraining } from '../models/Training';
 import User from '../models/User';
 import UserTrainingCompletion from '../models/UserTrainingCompletion';
