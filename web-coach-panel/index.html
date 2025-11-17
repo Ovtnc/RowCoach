@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RowCoach - Antrenör Paneli</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <div class="login-card">
+                <h1>🚣 RowCoach</h1>
+                <h2>Antrenör Paneli</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">E-posta</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Şifre</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Giriş Yap</button>
+                </form>
+                <div id="loginError" class="error-message"></div>
+                <div class="login-footer">
+                    <p>Hesabınız yok mu?</p>
+                    <button type="button" class="btn btn-secondary" onclick="showRegister()">Kayıt Ol</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Screen -->
+    <div id="registerScreen" class="screen">
+        <div class="login-container">
+            <div class="login-card">
+                <h1>🚣 RowCoach</h1>
+                <h2>Kayıt Ol</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="registerName">Ad Soyad *</label>
+                        <input type="text" id="registerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">E-posta *</label>
+                        <input type="email" id="registerEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Şifre *</label>
+                        <input type="password" id="registerPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerRole">Rol *</label>
+                        <select id="registerRole" required>
+                            <option value="athlete">Sporcu</option>
+                            <option value="coach">Antrenör</option>
+                            <option value="both">Sporcu & Antrenör</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Kayıt Ol</button>
+                </form>
+                <div id="registerError" class="error-message"></div>
+                <div id="registerSuccess" class="success-message"></div>
+                <div class="login-footer">
+                    <p>Zaten hesabınız var mı?</p>
+                    <button type="button" class="btn btn-secondary" onclick="showLogin()">Giriş Yap</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboardScreen" class="screen">
+        <header class="header">
+            <h1>🚣 Antrenör Paneli</h1>
+            <div class="header-actions">
+                <div class="club-selector-header">
+                    <label for="clubSelectorHeader">Klüp:</label>
+                    <select id="clubSelectorHeader" class="form-control-small">
+                        <option value="">Yükleniyor...</option>
+                    </select>
+                </div>
+                <span id="coachName"></span>
+                <button id="logoutBtn" class="btn btn-secondary">Çıkış</button>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+            <!-- Sidebar Menu -->
+            <aside class="sidebar">
+                <nav class="sidebar-nav">
+                    <button class="nav-item active" onclick="showPage('createClub')">
+                        <span class="nav-icon">🏢</span>
+                        <span class="nav-text">Klüp Oluştur</span>
+                    </button>
+                    <button class="nav-item" onclick="showPage('createUser')">
+                        <span class="nav-icon">👤</span>
+                        <span class="nav-text">Kullanıcı Oluştur</span>
+                    </button>
+                    <button class="nav-item" onclick="showPage('createTraining')">
+                        <span class="nav-icon">📝</span>
+                        <span class="nav-text">Antrenman Ekle</span>
+                    </button>
+                    <button class="nav-item" onclick="showPage('trainingsList')">
+                        <span class="nav-icon">📅</span>
+                        <span class="nav-text">Antrenmanlar</span>
+                    </button>
+                    <button class="nav-item" onclick="showPage('myClubs')">
+                        <span class="nav-icon">🏢</span>
+                        <span class="nav-text">Klüplerim</span>
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                <!-- Create Club Page -->
+                <div id="createClub" class="page active">
+                    <section class="section">
+                        <h2>Yeni Klüp Oluştur</h2>
+                        <form id="clubForm" class="training-form">
+                            <div class="form-group">
+                                <label for="clubName">Klüp Adı *</label>
+                                <input type="text" id="clubName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="clubDescription">Açıklama</label>
+                                <textarea id="clubDescription" rows="3"></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="clubLocation">Konum</label>
+                                    <input type="text" id="clubLocation">
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="clubIsPublic">
+                                        Herkese açık
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Klüp Oluştur</button>
+                        </form>
+                        <div id="clubFormError" class="error-message"></div>
+                        <div id="clubFormSuccess" class="success-message"></div>
+                    </section>
+                </div>
+
+                <!-- Create User Page -->
+                <div id="createUser" class="page">
+                    <section class="section">
+                        <h2>Yeni Kullanıcı Oluştur</h2>
+                <form id="userForm" class="training-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userName">Ad Soyad *</label>
+                            <input type="text" id="userName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userEmail">E-posta *</label>
+                            <input type="email" id="userEmail" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userPassword">Şifre *</label>
+                            <input type="password" id="userPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userRole">Rol *</label>
+                            <select id="userRole" required>
+                                <option value="athlete">Sporcu</option>
+                                <option value="coach">Antrenör</option>
+                                <option value="both">Sporcu & Antrenör</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="userClubId">Klüp *</label>
+                        <select id="userClubId" required>
+                            <option value="">Yükleniyor...</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Kullanıcı Oluştur</button>
+                </form>
+                <div id="userFormError" class="error-message"></div>
+                <div id="userFormSuccess" class="success-message"></div>
+                    </section>
+                </div>
+
+                <!-- Create Training Page -->
+                <div id="createTraining" class="page">
+                    <section class="section">
+                        <h2>Yeni Antrenman Ekle</h2>
+                        <form id="trainingForm" class="training-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="trainingTitle">Başlık *</label>
+                            <input type="text" id="trainingTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="trainingDate">Tarih *</label>
+                            <input type="datetime-local" id="trainingDate" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="trainingType">Tür *</label>
+                            <select id="trainingType" required>
+                                <option value="water">🌊 Su Antrenmanı</option>
+                                <option value="ergo">🏋️ Ergo Antrenmanı</option>
+                                <option value="custom">📝 Özel Antrenman</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="ergoDataGroup" style="display: none;">
+                            <label for="ergoDataId">ErgData ID</label>
+                            <input type="text" id="ergoDataId" placeholder="ErgData antrenman ID'si">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="trainingDescription">Açıklama</label>
+                        <textarea id="trainingDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="trainingDistance">Mesafe (m)</label>
+                            <input type="number" id="trainingDistance" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="trainingDuration">Süre (dakika)</label>
+                            <input type="number" id="trainingDuration" min="0" step="0.1">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Antrenman Ekle</button>
+                        </form>
+                        <div id="formError" class="error-message"></div>
+                        <div id="formSuccess" class="success-message"></div>
+                    </section>
+                </div>
+
+                <!-- Trainings List Page -->
+                <div id="trainingsList" class="page">
+                    <section class="section">
+                        <h2>Antrenmanlar</h2>
+                        <div id="trainingsListContent" class="trainings-list">
+                            <div class="loading">Yükleniyor...</div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- My Clubs Page -->
+                <div id="myClubs" class="page">
+                    <section class="section">
+                        <h2>Klüplerim</h2>
+                        <div id="clubsListContent" class="clubs-list">
+                            <div class="loading">Yükleniyor...</div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Edit Training Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Antrenman Düzenle</h2>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label for="editTitle">Başlık *</label>
+                    <input type="text" id="editTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="editDate">Tarih *</label>
+                    <input type="datetime-local" id="editDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="editType">Tür *</label>
+                    <select id="editType" required>
+                        <option value="water">🌊 Su Antrenmanı</option>
+                        <option value="ergo">🏋️ Ergo Antrenmanı</option>
+                        <option value="custom">📝 Özel Antrenman</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editDescription">Açıklama</label>
+                    <textarea id="editDescription" rows="3"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editDistance">Mesafe (m)</label>
+                        <input type="number" id="editDistance" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="editDuration">Süre (dakika)</label>
+                        <input type="number" id="editDuration" min="0" step="0.1">
+                    </div>
+                </div>
+                <div class="form-group" id="editErgoDataGroup" style="display: none;">
+                    <label for="editErgoDataId">ErgData ID</label>
+                    <input type="text" id="editErgoDataId">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">İptal</button>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
