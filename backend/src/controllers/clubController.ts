@@ -77,9 +77,20 @@ export const getClub = async (req: AuthRequest, res: Response): Promise<void> =>
 export const joinClub = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId;
-    const { invitationCode } = req.body;
+    let { invitationCode } = req.body;
 
-    const club = await Club.findOne({ invitationCode });
+    if (!invitationCode) {
+      res.status(400).json({ error: 'Invitation code is required' });
+      return;
+    }
+
+    // Normalize invitation code (trim and lowercase)
+    invitationCode = invitationCode.trim().toLowerCase();
+
+    // Find club by invitation code (case-insensitive)
+    const club = await Club.findOne({ 
+      invitationCode: { $regex: new RegExp(`^${invitationCode}$`, 'i') }
+    });
 
     if (!club) {
       res.status(404).json({ error: 'Invalid invitation code' });
