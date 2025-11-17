@@ -28,8 +28,15 @@ export const authenticate = (
     req.userId = decoded.userId;
     req.userRole = decoded.role;
     next();
-  } catch (error) {
-    res.status(401).json({ error: 'Invalid token' });
+  } catch (error: any) {
+    console.error('Token verification error:', error.message);
+    if (error.name === 'TokenExpiredError') {
+      res.status(401).json({ error: 'Token expired' });
+    } else if (error.name === 'JsonWebTokenError') {
+      res.status(401).json({ error: 'Invalid token' });
+    } else {
+      res.status(401).json({ error: 'Authentication failed' });
+    }
   }
 };
 
