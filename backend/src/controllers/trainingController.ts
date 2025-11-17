@@ -34,7 +34,8 @@ export const getTrainings = async (req: Request, res: Response) => {
       // Add completion status to each training
       const trainingsWithCompletion = trainings.map((training) => {
         const trainingObj = training.toObject();
-        const completionStatus = completionMap.get(training._id.toString());
+        const trainingId = (training._id as mongoose.Types.ObjectId).toString();
+        const completionStatus = completionMap.get(trainingId);
         return {
           ...trainingObj,
           completed: completionStatus !== undefined ? completionStatus : (training.completed || false),
@@ -199,7 +200,65 @@ export const deleteTraining = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Training not found' });
     }
 
+    // Delete all completion records for this training
+    await UserTrainingCompletion.deleteMany({ trainingId: id });
+
     res.json({ message: 'Training deleted successfully' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Toggle training completion status for a user
+export const toggleTrainingCompletion = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const { trainingId } = req.params;
+    const { completed } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!trainingId) {
+      return res.status(400).json({ error: 'trainingId is required' });
+    }
+
+    // Check if training exists
+    const training = await Training.findById(trainingId);
+    if (!training) {
+      return res.status(404).json({ error: 'Training not found' });
+    }
+
+    // Find or create completion record
+    let completion = await UserTrainingCompletion.findOne({
+      userId,
+      trainingId,
+    });
+
+    if (completion) {
+      completion.completed = completed !== undefined ? completed : !completion.completed;
+      if (completion.completed) {
+        completion.completedAt = new Date();
+      } else {
+        completion.completedAt = undefined;
+      }
+      await completion.save();
+    } else {
+      completion = new UserTrainingCompletion({
+        userId,
+        trainingId,
+        completed: completed !== undefined ? completed : true,
+        completedAt: completed !== undefined && completed ? new Date() : undefined,
+      });
+      await completion.save();
+    }
+
+    res.json({
+      message: 'Training completion updated',
+      completed: completion.completed,
+      completedAt: completion.completedAt,
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
