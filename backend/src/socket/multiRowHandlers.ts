@@ -15,7 +15,7 @@ export const setupMultiRowHandlers = (io: Server, socket: Socket) => {
       });
 
       // Send current session state to the joiner
-      const session = await MultiRowSession.findOne({ code: sessionCode });
+      const session = await MultiRowSession.findOne({ code: sessionCode.toUpperCase() });
       if (session) {
         socket.emit('multi-row:session-state', {
           session: {
@@ -39,7 +39,7 @@ export const setupMultiRowHandlers = (io: Server, socket: Socket) => {
       const { sessionCode, userId, stats } = data;
       
       // Update in database
-      const session = await MultiRowSession.findOne({ code: sessionCode });
+      const session = await MultiRowSession.findOne({ code: sessionCode.toUpperCase() });
       if (session) {
         const participant = session.participants.find(p => p.userId === userId);
         if (participant) {
@@ -74,13 +74,15 @@ export const setupMultiRowHandlers = (io: Server, socket: Socket) => {
     try {
       const { sessionCode, workoutType } = data;
       
-      const session = await MultiRowSession.findOne({ code: sessionCode });
+      const session = await MultiRowSession.findOne({ code: sessionCode.toUpperCase() });
       if (session) {
-        session.workoutType = workoutType;
+        // Frontend'den gelen workoutType'ı normalize et
+        const normalizedWorkoutType = workoutType === 'just_row' ? 'just-row' : workoutType;
+        session.workoutType = normalizedWorkoutType as 'just-row' | 'interval' | null;
         await session.save();
         
         io.to(`session-${sessionCode}`).emit('multi-row:workout-selected', {
-          workoutType,
+          workoutType: normalizedWorkoutType,
         });
       }
     } catch (error) {
@@ -91,7 +93,7 @@ export const setupMultiRowHandlers = (io: Server, socket: Socket) => {
   // Host starts workout
   socket.on('multi-row:start-workout', async (sessionCode: string) => {
     try {
-      const session = await MultiRowSession.findOne({ code: sessionCode });
+      const session = await MultiRowSession.findOne({ code: sessionCode.toUpperCase() });
       if (session) {
         session.status = 'active';
         session.startedAt = new Date();
@@ -114,7 +116,7 @@ export const setupMultiRowHandlers = (io: Server, socket: Socket) => {
     try {
       const { sessionCode, userId } = data;
       
-      const session = await MultiRowSession.findOne({ code: sessionCode });
+      const session = await MultiRowSession.findOne({ code: sessionCode.toUpperCase() });
       if (session) {
         const participant = session.participants.find(p => p.userId === userId);
         if (participant) {

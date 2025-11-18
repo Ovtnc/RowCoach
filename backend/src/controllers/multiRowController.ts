@@ -47,6 +47,7 @@ export const createSession = async (req: Request, res: Response) => {
         code: session.code,
         hostId: session.hostId,
         workoutType: session.workoutType,
+        intervalPlan: session.intervalPlan || [],
         participants: session.participants,
         status: session.status,
       },
@@ -101,6 +102,7 @@ export const joinSession = async (req: Request, res: Response) => {
         code: session.code,
         hostId: session.hostId,
         workoutType: session.workoutType,
+        intervalPlan: session.intervalPlan || [],
         participants: session.participants,
         status: session.status,
       },
@@ -116,7 +118,7 @@ export const updateWorkoutType = async (req: Request, res: Response) => {
   try {
     const { code, workoutType, userId } = req.body;
 
-    const session = await MultiRowSession.findOne({ code });
+    const session = await MultiRowSession.findOne({ code: code?.toUpperCase() });
 
     if (!session) {
       return res.status(404).json({ message: 'Session not found' });
@@ -141,7 +143,7 @@ export const startSession = async (req: Request, res: Response) => {
   try {
     const { code, userId } = req.body;
 
-    const session = await MultiRowSession.findOne({ code });
+    const session = await MultiRowSession.findOne({ code: code?.toUpperCase() });
 
     if (!session) {
       return res.status(404).json({ message: 'Session not found' });
@@ -167,7 +169,7 @@ export const updateParticipantStats = async (req: Request, res: Response) => {
   try {
     const { code, userId, stats } = req.body;
 
-    const session = await MultiRowSession.findOne({ code });
+    const session = await MultiRowSession.findOne({ code: code?.toUpperCase() });
 
     if (!session) {
       return res.status(404).json({ message: 'Session not found' });
@@ -207,12 +209,76 @@ export const getSession = async (req: Request, res: Response) => {
   }
 };
 
+// Update interval plan
+export const updateIntervalPlan = async (req: Request, res: Response) => {
+  try {
+    const { code, userId, intervalPlan } = req.body;
+
+    const upperCode = code?.toUpperCase();
+    console.log('Update interval plan request:', {
+      originalCode: code,
+      upperCode,
+      userId,
+      intervalPlanLength: intervalPlan?.length,
+      intervalPlan: intervalPlan,
+    });
+
+    if (!code || !userId) {
+      return res.status(400).json({ message: 'Code and userId are required' });
+    }
+
+    if (!Array.isArray(intervalPlan)) {
+      return res.status(400).json({ message: 'intervalPlan must be an array' });
+    }
+
+    const session = await MultiRowSession.findOne({ code: upperCode });
+
+    if (!session) {
+      // Tüm session'ları kontrol et (debug için)
+      const allSessions = await MultiRowSession.find({}).select('code').limit(10);
+      console.error('Session not found for code:', {
+        searchedCode: upperCode,
+        originalCode: code,
+        availableSessions: allSessions.map(s => s.code),
+      });
+      return res.status(404).json({ message: 'Session not found' });
+    }
+
+    if (session.hostId !== userId) {
+      console.error('User is not host:', { sessionHostId: session.hostId, userId });
+      return res.status(403).json({ message: 'Only host can update interval plan' });
+    }
+
+    if (session.workoutType !== 'interval') {
+      console.error('Workout type is not interval:', { workoutType: session.workoutType });
+      return res.status(400).json({ message: 'Workout type must be interval' });
+    }
+
+    session.intervalPlan = intervalPlan || [];
+    await session.save();
+
+    console.log('Interval plan updated successfully:', {
+      code: session.code,
+      planLength: session.intervalPlan.length,
+    });
+
+    res.json({ session });
+  } catch (error: any) {
+    console.error('Update interval plan error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+    });
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 // Finish session
 export const finishSession = async (req: Request, res: Response) => {
   try {
     const { code } = req.body;
 
-    const session = await MultiRowSession.findOne({ code });
+    const session = await MultiRowSession.findOne({ code: code?.toUpperCase() });
 
     if (!session) {
       return res.status(404).json({ message: 'Session not found' });

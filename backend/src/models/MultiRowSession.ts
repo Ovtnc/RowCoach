@@ -12,10 +12,19 @@ export interface IMultiRowParticipant {
   joinedAt: Date;
 }
 
+export interface IMultiRowIntervalStep {
+  id: string;
+  type: 'exercise' | 'rest';
+  valueType: 'duration' | 'distance';
+  value: number; // Süre (saniye) veya Mesafe (metre)
+  targetTempo?: number; // Hedef tempo (SPM)
+}
+
 export interface IMultiRowSession extends Document {
   code: string;
   hostId: string;
   workoutType: 'just-row' | 'interval' | null;
+  intervalPlan?: IMultiRowIntervalStep[]; // Interval antrenmanı için plan
   participants: IMultiRowParticipant[];
   status: 'waiting' | 'active' | 'completed';
   startedAt: Date | null;
@@ -53,6 +62,16 @@ const MultiRowSessionSchema = new Schema({
     type: String, 
     enum: ['just-row', 'interval', null],
     default: null,
+  },
+  intervalPlan: {
+    type: [{
+      id: { type: String, required: true },
+      type: { type: String, enum: ['exercise', 'rest'], required: true },
+      valueType: { type: String, enum: ['duration', 'distance'], required: true },
+      value: { type: Number, required: true },
+      targetTempo: { type: Number, default: null },
+    }],
+    default: [],
   },
   participants: [MultiRowParticipantSchema],
   status: { 

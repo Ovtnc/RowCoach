@@ -3,6 +3,7 @@ import {
   createSession,
   joinSession,
   updateWorkoutType,
+  updateIntervalPlan,
   startSession,
   updateParticipantStats,
   getSession,
@@ -24,17 +25,20 @@ router.post('/join', joinSession);
 // Update workout type (host only)
 router.put('/workout-type', updateWorkoutType);
 
+// Update interval plan (host only)
+router.put('/interval-plan', updateIntervalPlan);
+
 // Start session (host only)
 router.post('/start', startSession);
 
 // Update participant stats
 router.put('/stats', updateParticipantStats);
 
-// Get session by code
-router.get('/:code', getSession);
-
 // Finish session
 router.post('/finish', finishSession);
+
+// Get session by code (must be last to avoid matching other routes)
+router.get('/:code', getSession);
 
 export default router;
 
