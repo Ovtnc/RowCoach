@@ -10,6 +10,7 @@ import clubRoutes from './routes/clubRoutes';
 import multiRowRoutes from './routes/multiRowRoutes';
 import trainingRoutes from './routes/trainingRoutes';
 import userRoutes from './routes/userRoutes';
+import geminiRoutes from './routes/geminiRoutes';
 import { setupMultiRowHandlers } from './socket/multiRowHandlers';
 
 // Load environment variables
@@ -41,6 +42,7 @@ app.use('/api/clubs', clubRoutes);
 app.use('/api/multi-row', multiRowRoutes);
 app.use('/api/trainings', trainingRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/gemini', geminiRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

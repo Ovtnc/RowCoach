@@ -1,30 +1,21 @@
-import express from 'express';
+import { Router } from 'express';
+import { authenticate } from '../middleware/auth';
 import {
   createWorkout,
   getWorkouts,
-  getWorkoutById,
+  getWorkout,
   updateWorkout,
   deleteWorkout,
-  getWorkoutStats,
-  getPublicWorkouts,
 } from '../controllers/workoutController';
-import { authenticate } from '../middleware/auth';
 
-const router = express.Router();
+const router = Router();
 
-router.post('/', authenticate, createWorkout);
-router.get('/', authenticate, getWorkouts);
-router.get('/public', authenticate, getPublicWorkouts);
-router.get('/stats', authenticate, getWorkoutStats);
-router.get('/:id', authenticate, getWorkoutById);
-router.put('/:id', authenticate, updateWorkout);
-router.delete('/:id', authenticate, deleteWorkout);
+router.use(authenticate);
+
+router.post('/', createWorkout);
+router.get('/', getWorkouts);
+router.get('/:id', getWorkout);
+router.put('/:id', updateWorkout);
+router.delete('/:id', deleteWorkout);
 
 export default router;
-
-
-
-
-
-
-
